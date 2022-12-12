@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Contacto;
+use Carbon\Carbon;
+use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -38,9 +40,24 @@ class ContactoController extends Controller
                 "fecha_nacimiento"  => 'required|max:255',
                 'direccion'         => 'required|max:255',
                 "email"             => 'required|max:255',
+                "sexo"              => 'required',
             ]);
             if ($validated->fails()) {
                 return response()->json($validated, 210);
+            }
+
+            if ($request->fecha_nacimiento) {
+                # test validar fecha de nacimiento, si la persona es menor a 18 retorna error
+                $años = $this->calcularFecha($request->fecha_nacimiento);
+                if ($años < 18) {
+                    $data['respuesta'] = [
+                        'codigo' => 502,
+                        'icon' => 'mdi-succsess',
+                        'text' => 'El contacto es menor de edad, tiene (' . $años . ') años, verifique datos.',
+
+                    ];
+                    return response()->json($data, 500);
+                }
             }
 
             $crearContacto = Contacto::create([
@@ -50,6 +67,7 @@ class ContactoController extends Controller
                 "fecha_nacimiento"  => $request->fecha_nacimiento,
                 'direccion'         => $request->direccion,
                 "email"             => $request->email,
+                "sexo"              => $request->sexo,
             ]);
             $data['respuesta'] = [
                 'codigo' => 200,
@@ -69,6 +87,21 @@ class ContactoController extends Controller
             ];
             return response()->json($data, 412);
         }
+    }
+
+    /**
+     * Calclular fecha
+     * @return bool
+     */
+
+    public function calcularFecha($fecha)
+    {
+        $f_nacimiento = new DateTime($fecha);
+        // $hoy =  Carbon::parce(NOW());
+        $hoy =  new DateTime(date("Y-m-d"));
+
+        $calclular = $hoy->diff($f_nacimiento);
+        return $calclular->format('%y');
     }
 
     /**
@@ -122,6 +155,7 @@ class ContactoController extends Controller
                 "fecha_nacimiento"  => $request->params['fecha_nacimiento'],
                 'direccion'         => $request->params['direccion'],
                 "email"             => $request->params['email'],
+                "sexo"             => $request->params['sexo'],
             ]);
             $data['respuesta'] = [
                 'codigo' => 200,

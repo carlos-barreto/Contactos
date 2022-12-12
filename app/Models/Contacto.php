@@ -18,7 +18,8 @@ class Contacto extends Model
         'telefono',
         'fecha_nacimiento',
         'direccion',
-        'email'
+        'email',
+        'sexo'
     ];
 
     public function account()

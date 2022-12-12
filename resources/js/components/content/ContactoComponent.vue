@@ -172,6 +172,7 @@ export default {
         fecha_nacimiento: null,
         direccion: null,
         email: null,
+        sexo: null,
       },
       search: "",
       updateTable: false,

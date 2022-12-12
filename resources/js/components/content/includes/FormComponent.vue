@@ -74,6 +74,16 @@
             outlined
           ></v-text-field>
         </v-col>
+        <v-col cols="12">
+          <v-select
+            v-model="newVal.sexo"
+            :items="itemsSexo"
+            item-value="sexo"
+            item-text="text"
+            label="Sexo"
+            outlined
+          ></v-select>
+        </v-col>
 
         <v-card-actions class="d-flex justify-center">
           <v-btn color="primary" text @click="Reset"> Limpiar campos </v-btn>
@@ -89,6 +99,16 @@
 export default {
   props: ["datos"],
   data: () => ({
+    itemsSexo: [
+      {
+        sexo: "0",
+        text: "Masculino",
+      },
+      {
+        sexo: "1",
+        text: "Femenino",
+      },
+    ],
     valid: false,
     menuFecha: false,
     date: new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
@@ -112,46 +132,55 @@ export default {
         : "/Contacto/create";
     },
   },
+  watch: {},
   methods: {
     EnviarDatos() {
       this.$toast("Un momento por favor...", this.$root.optToast);
-      if (this.$refs.form.validate()) {
-        if (this.newVal.hasOwnProperty("id")) {
-          let params = { params: this.newVal };
-          axios
-            .put(this.customUrl, params)
-            .then((res) => {
-              if (res.data.respuesta.codigo == 200) {
-                this.$toast.success(
-                  "Muy bien contacto actualizado",
-                  res.data.respuesta.text
-                );
-                this.$emit("reset", true);
-                this.Reset();
-              }
-            })
-            .catch((err) => {
-              this.$toast.error("Upss", err.response.data.respuesta.text);
-            });
-        } else {
-          let params = { params: this.newVal };
-          axios
-            .get(this.customUrl, params)
-            .then((res) => {
-              if (res.data.respuesta.codigo == 200) {
-                this.$toast.success("Muy bien", res.data.respuesta.text);
-                this.$emit("reset", true);
-                this.Reset();
-              }
-            })
-            .catch((err) => {
-              this.$toast.error("Upss", err.response.data.respuesta.text);
-            });
-        }
+      // if (this.$refs.form.validate()) {
+      if (this.newVal.hasOwnProperty("id")) {
+        let params = { params: this.newVal };
+        axios
+          .put(this.customUrl, params)
+          .then((res) => {
+            if (res.data.respuesta.codigo == 200) {
+              this.$toast.success(
+                "Muy bien contacto actualizado",
+                res.data.respuesta.text
+              );
+              this.$emit("reset", true);
+              this.Reset();
+            }
+          })
+          .catch((err) => {
+            this.$toast.error(
+              `Upss  ${err.response.data.respuesta.text}`,
+              err.response.data.respuesta.text
+            );
+          });
       } else {
-        this.$refs.form.validate();
-        this.$toast.error("Valida los campos", this.$root.optToast);
+        let params = { params: this.newVal };
+        axios
+          .get(this.customUrl, params)
+          .then((res) => {
+            if (res.data.respuesta.codigo == 200) {
+              this.$toast.success("Muy bien", res.data.respuesta.text);
+              this.$emit("reset", true);
+              this.Reset();
+            }
+          })
+          .catch((err) => {
+            // console.log(err.response.data.respuesta);
+
+            this.$toast.error(
+              `Upss  ${err.response.data.respuesta.text}`,
+              err.response.data.respuesta.text
+            );
+          });
       }
+      // } else {
+      //   this.$refs.form.validate();
+      //   this.$toast.error("Valida los campos", this.$root.optToast);
+      // }
     },
     Reset() {
       this.$refs.form.reset();
